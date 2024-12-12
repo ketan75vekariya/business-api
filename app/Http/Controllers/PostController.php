@@ -95,4 +95,15 @@ class PostController extends Controller
         }
     }
 
+     //retrieve all posts
+     public function getAllPosts(){
+        try {
+            $posts = Post::all();
+            return response()->json([
+                'posts' => $posts
+            ],200);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()],403);
+        }
+    }
 }
