@@ -36,4 +36,63 @@ class PostController extends Controller
         }
     }
 
+     //edit a post
+     public function editPost(Request $request){
+        $validated = Validator::make($request->all(),[
+            'title' => 'required|string',
+            'content' => 'required|string',
+            'post_id' => 'required|integer',
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json($validated->errors(),403);
+        }
+
+        try {
+            $post_data = Post::find($request->post_id);
+
+           $updatePost = $post_data->update([
+                'title' => $request->title,
+                'content' => $request->content,
+            ]);
+             //return
+             return response()->json([
+                'message' => 'Post updated successfully',
+                'updated_post' => $updatePost,
+            ],200);
+
+        } catch (\Exception $th) {
+            return response()->json(['error' => $th->getMessage()],403);
+        }
+    }
+
+    //edit a post approach 2
+    public function editPost2(Request $request,$post_id){
+        $validated = Validator::make($request->all(),[
+            'title' => 'required|string',
+            'content' => 'required|string',
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json($validated->errors(),403);
+        }
+
+        try {
+            $post_data = Post::find($post_id);
+
+           $updatePost = $post_data->update([
+                'title' => $request->title,
+                'content' => $request->content,
+            ]);
+             //return
+             return response()->json([
+                'message' => 'Post updated successfully',
+                'updated_post' => $updatePost,
+            ],200);
+
+        } catch (\Exception $th) {
+            return response()->json(['error' => $th->getMessage()],403);
+        }
+    }
+
 }

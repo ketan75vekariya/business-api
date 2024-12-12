@@ -17,4 +17,8 @@ Route::middleware('auth:sanctum')->group(function(){
 
     //Blog api end point
     Route::post('/add/post', [PostController::class,'addNewPost']);
+    //edit approach 1
+    Route::post('/edit/post', [PostController::class,'editPost']);
+    //edit approach 2
+    Route::post('/edit/post/{post_id}', [PostController::class,'editPost2']);
 });
