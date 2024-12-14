@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use App\Http\Resources\SinglePostResource;
 class PostController extends Controller
 {
     //Add new post
@@ -104,6 +104,21 @@ class PostController extends Controller
             ],200);
         } catch (\Exception $exception) {
             return response()->json(['error' => $exception->getMessage()],403);
+        }
+    }
+
+    //Retrive Single post
+     //fetch single post
+     public function getPost($post_id){
+        try {
+            $post = Post::find($post_id);
+            // $post = Post::with('user','comment','likes')->where('id',$post_id)->first();
+            $post_data = new SinglePostResource($post);
+            return response()->json([
+                'post' => $post_data
+            ],200);
+        } catch (\Exception $th) {
+                        return response()->json(['error' => $th->getMessage()],403);
         }
     }
 
