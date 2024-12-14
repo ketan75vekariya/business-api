@@ -73,4 +73,15 @@ class AboutController extends Controller
             return response()->json(['error' => $th->getMessage()],403);
         }
     }
+    //retrieve about
+    public function getAllAbouts(){
+        try {
+            $abouts = Abouts::all();
+            return response()->json([
+                'Abouts' => $abouts
+            ],200);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()],403);
+        }
+    }
 }

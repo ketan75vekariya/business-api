@@ -56,4 +56,15 @@ class HomeController extends Controller
             return response()->json(['error' => $th->getMessage()],403);
         }
     }
+     //retrieve home
+     public function getHome(){
+        try {
+            $home = Home::all();
+            return response()->json([
+                'Home' => $home
+            ],200);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()],403);
+        }
+    }
 }
