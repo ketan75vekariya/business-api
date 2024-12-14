@@ -7,6 +7,7 @@ use App\Http\Controllers\LikesController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -25,7 +26,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/add/post', [PostController::class,'addNewPost']);
     //Home Create api end point
     Route::post('/home', [HomeController::class,'addNewHome']);
-    
+    //About Create api end point
+    Route::post('/about', [AboutController::class,'addNewAbout']);
     
     //edit approach 1
     // Route::post('/edit/post', [PostController::class,'editPost']);
@@ -33,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::put('/post/{post_id}', [PostController::class,'editPost']);
     //edit home
     Route::put('/home/{home_id}', [HomeController::class,'editHome']);
+     //edit about
+     Route::put('/about/{about_id}', [AboutController::class,'editAbout']);
      //delete post
     Route::delete('/post/{post_id}',[PostController::class,'deletePost']);
 
