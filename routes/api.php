@@ -11,6 +11,8 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\ClientController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,10 +28,14 @@ Route::get('/abouts',[AboutController::class,'getAllAbouts']);
 Route::get('/services',[ServiceController::class,'getAllServices']);
 Route::get('/contact',[ContactController::class,'getAllContacts']);
 Route::get('/testimonial',[TestimonialController::class,'getAllTestimonial']);
+Route::get('/team',[TeamController::class,'getAllTeam']);
+Route::get('/client',[ClientController::class,'getAllClient']);
 Route::get('/single/post/{post_id}',[PostController::class,'getPost']);
 Route::get('/service/{service_id}',[ServiceController::class,'getService']);
 Route::get('/contact/{contact_id}',[ContactController::class,'getContact']);
 Route::get('/testimonial/{testimonial_id}',[TestimonialController::class,'getTestimonial']);
+Route::get('/team/{team_id}',[TeamController::class,'getTeam']);
+Route::get('/client/{client_id}',[ClientController::class,'getClient']);
 
 //Athorized Apis
 Route::middleware('auth:sanctum')->group(function(){
@@ -45,8 +51,12 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/service', [ServiceController::class,'addNewService']);
     //Contact Create api end point
     Route::post('/contact', [ContactController::class,'addNewContact']);
-    //Contact Create api end point
+    //Testimonial Create api end point
     Route::post('/testimonial', [TestimonialController::class,'addNewTestimonial']);
+    //Team Create api end point
+    Route::post('/team', [TeamController::class,'addNewTeam']);
+    //Client api end point
+    Route::post('/client', [ClientController::class,'addNewClient']);
     
     //edit approach 1
     // Route::post('/edit/post', [PostController::class,'editPost']);
@@ -62,6 +72,10 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::put('/contact/{contact_id}', [ContactController::class,'editContact']);
     //edit Testimonial
     Route::put('/testimonial/{testimonial_id}', [TestimonialController::class,'editTestimonial']);
+    //edit Team
+    Route::put('/team/{team_id}', [TeamController::class,'editTeam']);
+    //edit Client
+    Route::put('/client/{client_id}', [ClientController::class,'editClient']);
     
     
     
@@ -73,6 +87,10 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/contact/{contact_id}',[ContactController::class,'deleteContact']);
     //delete Testimonial info
     Route::delete('/testimonial/{testimonial_id}',[TestimonialController::class,'deleteTestimonial']);
+    //delete Team member
+    Route::delete('/team/{team_id}',[TeamController::class,'deleteTeam']);
+    //delete Client member
+    Route::delete('/client/{client_id}',[ClientController::class,'deleteClient']);
 
     //Comment
     Route::post('/comment',[CommentController::class,'postComment']);
