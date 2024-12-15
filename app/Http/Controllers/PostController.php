@@ -108,8 +108,8 @@ class PostController extends Controller
     }
 
     //Retrive Single post
-     //fetch single post
-     public function getPost($post_id){
+    //fetch single post
+    public function getPost($post_id){
         try {
             $post = Post::find($post_id);
             // $post = Post::with('user','comment','likes')->where('id',$post_id)->first();
