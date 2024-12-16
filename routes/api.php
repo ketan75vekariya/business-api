@@ -13,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\SocialmediaController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,19 +31,21 @@ Route::get('/contact',[ContactController::class,'getAllContacts']);
 Route::get('/testimonial',[TestimonialController::class,'getAllTestimonial']);
 Route::get('/team',[TeamController::class,'getAllTeam']);
 Route::get('/client',[ClientController::class,'getAllClient']);
+Route::get('/socialmedia',[SocialmediaController::class,'getAllSocialmedia']);
 Route::get('/single/post/{post_id}',[PostController::class,'getPost']);
 Route::get('/service/{service_id}',[ServiceController::class,'getService']);
 Route::get('/contact/{contact_id}',[ContactController::class,'getContact']);
 Route::get('/testimonial/{testimonial_id}',[TestimonialController::class,'getTestimonial']);
 Route::get('/team/{team_id}',[TeamController::class,'getTeam']);
 Route::get('/client/{client_id}',[ClientController::class,'getClient']);
+Route::get('/socialmedia/{socialmedia_id}',[SocialmediaController::class,'getSocialmedia']);
 
 //Athorized Apis
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout',[AuthController::class,'logout']);
 
     //Blog api end point
-    Route::post('/add/post', [PostController::class,'addNewPost']);
+    Route::post('/post', [PostController::class,'addNewPost']);
     //Home Create api end point
     Route::post('/home', [HomeController::class,'addNewHome']);
     //About Create api end point
@@ -57,6 +60,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/team', [TeamController::class,'addNewTeam']);
     //Client api end point
     Route::post('/client', [ClientController::class,'addNewClient']);
+    //Socialmedia api end point
+    Route::post('/socialmedia', [SocialmediaController::class,'addNewSocialmedia']);
     
     //edit approach 1
     // Route::post('/edit/post', [PostController::class,'editPost']);
@@ -76,6 +81,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::put('/team/{team_id}', [TeamController::class,'editTeam']);
     //edit Client
     Route::put('/client/{client_id}', [ClientController::class,'editClient']);
+    //edit Social media link
+    Route::put('/socialmedia/{socialmedia_id}', [SocialmediaController::class,'editSocialmedia']);
     
     
     
@@ -91,6 +98,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/team/{team_id}',[TeamController::class,'deleteTeam']);
     //delete Client member
     Route::delete('/client/{client_id}',[ClientController::class,'deleteClient']);
+    //delete Social media link
+    Route::delete('/socialmedia/{socialmedia_id}',[SocialmediaController::class,'deleteSocialmedia']);
 
     //Comment
     Route::post('/comment',[CommentController::class,'postComment']);
