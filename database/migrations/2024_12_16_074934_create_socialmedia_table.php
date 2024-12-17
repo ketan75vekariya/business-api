@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('link');
+            $table->string('image_path')->nullable(); // Column for storing the image path
             $table->timestamps();
         });
     }

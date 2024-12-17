@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('clientName');
             $table->string('clientDescription');
+            $table->string('image_path')->nullable(); // Column for storing the image path
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('whyUs');
             $table->text('goal');
             $table->text('mission');
+            $table->string('image_path')->nullable(); // Column for storing the image path
             $table->timestamps();
         });
     }
