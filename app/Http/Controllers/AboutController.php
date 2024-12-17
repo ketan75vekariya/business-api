@@ -7,36 +7,57 @@ use Illuminate\Support\Facades\Validator;
 
 class AboutController extends Controller
 {
-    public function addNewAbout(Request $request){
-        $validated = Validator::make($request->all(),[
+    public function addNewAbout(Request $request)
+    {
+        // Validation
+        $validated = Validator::make($request->all(), [
             'aboutTitle' => 'required|string',
-            'aboutDescription'=>'required|string',
-            'whyUs'=>'string',
-            'goal'=>'string',
-            'mission'=>'string',
+            'aboutDescription' => 'required|string',
+            'whyUs' => 'nullable|string',
+            'goal' => 'nullable|string',
+            'mission' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-
+    
         if ($validated->fails()) {
-            return response()->json($validated->errors(),403);
+            return response()->json($validated->errors(), 403);
         }
-
+    
         try {
-            $about = Abouts::create([
-                'aboutTitle' => $request->aboutTitle,
-                'aboutDescription' => $request->aboutDescription,
-                'whyUs' => $request->whyUs,
-                'goal'=>$request->goal,
-                'mission'=>$request->mission,
-
-            ]);
-
-             //return
-             return response()->json([
+            $about = new Abouts();
+            $about->aboutTitle = $request->aboutTitle;
+            $about->aboutDescription = $request->aboutDescription;
+            $about->goal = $request->goal;
+            $about->mission = $request->mission;
+            $about->aboutTitle = $request->aboutTitle;
+            $about->whyUs = $request->whyUs;
+             // Handle image upload
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('images', 'public');
+                $about->image_path = $path; // Store the path in the database
+            }
+            $about->save();
+    
+            
+            // Generate full image URL if path exists
+            $imageUrl = $path ? url('storage/' . $path) : null;
+    
+            // Return success response
+            return response()->json([
                 'message' => 'About Data added successfully',
-            ],200);
-
+                'data' => [
+                    'id' => $about->id,
+                    'aboutTitle' => $about->aboutTitle,
+                    'aboutDescription' => $about->aboutDescription,
+                    'whyUs' => $about->whyUs,
+                    'goal' => $about->goal,
+                    'mission' => $about->mission,
+                    'image_url' => $imageUrl, // Return full image URL
+                ],
+            ], 200);
+    
         } catch (\Exception $th) {
-            return response()->json(['error' => $th->getMessage()],403);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
     //update
@@ -47,6 +68,7 @@ class AboutController extends Controller
             'whyUs'=>'string',
             'goal'=>'string',
             'mission'=>'string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validated->fails()) {
@@ -54,19 +76,30 @@ class AboutController extends Controller
         }
 
         try {
-            $about_data = Abouts::find($about_id);
+            $about_data = Abouts::findOrFail($about_id);
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete the old image if it exists
+                if ($about_data->image_path && \Storage::disk('public')->exists($about_data->image_path)) {
+                    \Storage::disk('public')->delete($about_data->image_path);
+                }
 
+                // Upload the new image
+                $newImagePath = $request->file('image')->store('images', 'public');
+                $about_data->image_path = $newImagePath;
+            }
            $updateAboutData = $about_data->update([
                 'aboutTitle' => $request->aboutTitle,
                 'aboutDescription' => $request->aboutDescription,
                 'whyUs' => $request->whyUs,
                 'goal'=>$request->goal,
                 'mission'=>$request->mission,
+                'image_path' =>$newImagePath,
             ]);
              //return
              return response()->json([
                 'message' => 'Description updated successfully',
-                'updated_data' => $updateAboutData,
+                'updated_data' => $about_data,
             ],200);
 
         } catch (\Exception $th) {
@@ -77,8 +110,21 @@ class AboutController extends Controller
     public function getAllAbouts(){
         try {
             $abouts = Abouts::all();
+            $formattedAbouts = $abouts->map(function ($about) {
+                return [
+                    'id' => $about->id,
+                    'title' => $about->aboutTitle,
+                    'description' => $about->aboutDescription,
+                    'whyUs' => $about->whyUs,
+                    'goal' => $about->goal,
+                    'mission' => $about->mission,
+                    'image_url' => $about->image_path ? url('storage/' . $about->image_path) : null,
+                    'created_at' => $about->created_at,
+                    'updated_at' => $about->updated_at,
+                ];
+            });
             return response()->json([
-                'Abouts' => $abouts
+                'Abouts' => $formattedAbouts
             ],200);
         } catch (\Exception $exception) {
             return response()->json(['error' => $exception->getMessage()],403);
