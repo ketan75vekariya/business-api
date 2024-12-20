@@ -27,7 +27,7 @@ class PostController extends Controller
             $post->user_id = auth()->user()->id;
              // Handle image upload
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('images', 'public');
+                $path = $request->file('image')->store('images/post', 'public');
                 $post->image_path = $path; // Store the path in the database
             }
             $post->save();
@@ -79,7 +79,7 @@ class PostController extends Controller
                 }
 
                 // Upload the new image
-                $newImagePath = $request->file('image')->store('images', 'public');
+                $newImagePath = $request->file('image')->store('images/post', 'public');
                 $post->image_path = $newImagePath;
             }
 
@@ -149,8 +149,8 @@ class PostController extends Controller
                 return response()->json(['error' => 'Post not found'], 404);
             }
              // Delete the associated image if it exists
-            if ($post->image_path && Storage::disk('public')->exists($post->image_path)) {
-                Storage::disk('public')->delete($post->image_path);
+            if ($post->image_path && \Storage::disk('public')->exists($post->image_path)) {
+                \Storage::disk('public')->delete($post->image_path);
             }
             $post->delete();
             return response()->json([

@@ -96,8 +96,10 @@ Route::middleware('auth:sanctum')->group(function(){
     
      //delete post
     Route::delete('/post/{post_id}',[PostController::class,'deletePost']);
-    //delete post
+    //delete service
     Route::delete('/service/{service_id}',[ServiceController::class,'deleteService']);
+    //delete about
+    Route::delete('/about/{about_id}',[AboutController::class,'deleteAbout']);
     //delete contact info
     Route::delete('/contact/{contact_id}',[ContactController::class,'deleteContact']);
     //delete Testimonial info

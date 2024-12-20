@@ -33,7 +33,7 @@ class AboutController extends Controller
             $about->whyUs = $request->whyUs;
              // Handle image upload
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('images', 'public');
+                $path = $request->file('image')->store('images/about', 'public');
                 $about->image_path = $path; // Store the path in the database
             }
             $about->save();
@@ -85,7 +85,7 @@ class AboutController extends Controller
                 }
 
                 // Upload the new image
-                $newImagePath = $request->file('image')->store('images', 'public');
+                $newImagePath = $request->file('image')->store('images/about', 'public');
                 $about_data->image_path = $newImagePath;
             }
            $updateAboutData = $about_data->update([
@@ -128,6 +128,26 @@ class AboutController extends Controller
             ],200);
         } catch (\Exception $exception) {
             return response()->json(['error' => $exception->getMessage()],403);
+        }
+    }
+    //Delete About
+    public function deleteAbout(Request $request, $about_id){
+        try {
+            $about = About::find($about_id);
+            if (!$about) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+             // Delete the associated image if it exists
+             if ($about->image_path && \Storage::disk('public')->exists($about->image_path)) {
+                \Storage::disk('public')->delete($about->image_path);
+            }
+            $about->delete();
+            return response()->json([
+                'message' => 'about deleted successfully'
+            ],200);
+        } catch (\Exception $th) {
+            return response()->json(['error' => $th->getMessage()],403);
+
         }
     }
 }
