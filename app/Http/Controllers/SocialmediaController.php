@@ -13,6 +13,7 @@ class SocialmediaController extends Controller
         $validated = Validator::make($request->all(),[
             'name' => 'required|string',
             'link' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validated->fails()) {
@@ -23,6 +24,10 @@ class SocialmediaController extends Controller
             $socialmedia = new Socialmedia();
             $socialmedia->name = $request->name;
             $socialmedia->link = $request->link;
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('images/socialmedia', 'public');
+                $socialmedia->image_path = $path; // Store the path in the database
+            }
             $socialmedia->save();
 
              //return
@@ -40,6 +45,7 @@ class SocialmediaController extends Controller
         $validated = Validator::make($request->all(),[
             'name' => 'required|string',
             'link' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validated->fails()) {
@@ -48,10 +54,21 @@ class SocialmediaController extends Controller
 
         try {
             $socialmedia_data = Socialmedia::find($socialmedia_id);
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete the old image if it exists
+                if ($socialmedia_data->image_path && \Storage::disk('public')->exists($socialmedia_data->image_path)) {
+                    \Storage::disk('public')->delete($socialmedia_data->image_path);
+                }
 
+                // Upload the new image
+                $newImagePath = $request->file('image')->store('images/socialmedia', 'public');
+                $socialmedia_data->image_path = $newImagePath;
+            }
            $updateSocialmedia = $socialmedia_data->update([
                 'name' => $request->name,
                 'link' => $request->link,
+                'image_path' => $newImagePath,
             ]);
              //return
              return response()->json([
@@ -66,9 +83,19 @@ class SocialmediaController extends Controller
     //retrieve all socialmedia
     public function getAllSocialmedia(){
         try {
-            $socialmedia = Socialmedia::all();
+            $socialmedias = Socialmedia::all();
+            $formattedsocialmedia = $socialmedias->map(function ($socialmedia) {
+                return [
+                    'id' => $socialmedia->id,
+                    'name' => $socialmedia->name,
+                    'link' => $socialmedia->link,
+                    'image_url' => $socialmedia->image_path ? url('storage/' . $socialmedia->image_path) : null,
+                    'created_at' => $socialmedia->created_at,
+                    'updated_at' => $socialmedia->updated_at,
+                ];
+            });
             return response()->json([
-                'socialmedias' => $socialmedia
+                'socialmedias' => $socialmedias
             ],200);
         } catch (\Exception $exception) {
             return response()->json(['error' => $exception->getMessage()],403);
@@ -82,7 +109,11 @@ class SocialmediaController extends Controller
             // $post = Post::with('user','comment','likes')->where('id',$post_id)->first();
             $socialmedia_data = Socialmedia::where('id',$socialmedia_id)->first();
             return response()->json([
-                'socialmedia' => $socialmedia_data
+                'name' => $socialmedia_data->name,
+                'link' => $socialmedia_data->link,
+                'image_path'=>$socialmedia_data->image_path ? asset('storage/' . $socialmedia_data->image_path) : null,
+                'created_at'=>$socialmedia_data->created_at,
+                'updated_at'=>$socialmedia_data->updated_at,
             ],200);
         } catch (\Exception $th) {
                         return response()->json(['error' => $th->getMessage()],403);
@@ -92,6 +123,13 @@ class SocialmediaController extends Controller
     public function deleteSocialmedia(Request $request, $socialmedia_id){
         try {
             $socialmedia = Socialmedia::find($socialmedia_id);
+            if (!$socialmedia) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+             // Delete the associated image if it exists
+             if ($socialmedia->image_path && \Storage::disk('public')->exists($socialmedia->image_path)) {
+                \Storage::disk('public')->delete($socialmedia->image_path);
+            }
             $socialmedia->delete();
             return response()->json([
                 'message' => 'socialmedia link deleted successfully'
