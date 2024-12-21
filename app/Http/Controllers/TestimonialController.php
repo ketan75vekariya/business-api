@@ -13,6 +13,7 @@ class TestimonialController extends Controller
         $validated = Validator::make($request->all(),[
             'clientName' => 'required|string',
             'clientReview' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validated->fails()) {
@@ -23,6 +24,10 @@ class TestimonialController extends Controller
             $testimonial = new Testimonial();
             $testimonial->clientName = $request->clientName;
             $testimonial->clientReview = $request->clientReview;
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('images/testimonial', 'public');
+                $testimonial->image_path = $path; // Store the path in the database
+            }
             $testimonial->save();
 
              //return
@@ -40,6 +45,7 @@ class TestimonialController extends Controller
         $validated = Validator::make($request->all(),[
             'clientName' => 'required|string',
             'clientReview' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validated->fails()) {
@@ -47,11 +53,22 @@ class TestimonialController extends Controller
         }
 
         try {
-            $testimonial_data = Testimonial::find($testimonial_id);
+            $testimonial_data = Testimonial::findOrFail($testimonial_id);
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete the old image if it exists
+                if ($testimonial_data->image_path && \Storage::disk('public')->exists($testimonial_data->image_path)) {
+                    \Storage::disk('public')->delete($testimonial_data->image_path);
+                }
 
+                // Upload the new image
+                $newImagePath = $request->file('image')->store('images/testimonial', 'public');
+                $testimonial_data->image_path = $newImagePath;
+            }
            $updateTestimonial = $testimonial_data->update([
                 'clientName' => $request->clientName,
                 'clientReview' => $request->clientReview,
+                'image_path' => $newImagePath,
             ]);
              //return
              return response()->json([
@@ -68,6 +85,16 @@ class TestimonialController extends Controller
     public function getAllTestimonial(){
         try {
             $testimonials = Testimonial::all();
+            $formattedTestimonial = $testimonials->map(function ($testimonial) {
+                return [
+                    'id' => $testimonial->id,
+                    'clientName' => $testimonial->clientName,
+                    'clientReview' => $testimonial->clientReview,
+                    'image_url' => $testimonial->image_path ? url('storage/' . $testimonial->image_path) : null,
+                    'created_at' => $testimonial->created_at,
+                    'updated_at' => $testimonial->updated_at,
+                ];
+            });
             return response()->json([
                 'testimonials' => $testimonials
             ],200);
@@ -83,7 +110,11 @@ class TestimonialController extends Controller
             // $post = Post::with('user','comment','likes')->where('id',$post_id)->first();
             $testimonial_data = Testimonial::where('id',$testimonial_id)->first();
             return response()->json([
-                'testimonial' => $testimonial_data
+                'clientName' => $testimonial_data->clientName,
+                'clientReview' => $testimonial_data->clientReview,
+                'image_path'=>$testimonial_data->image_path ? asset('storage/' . $testimonial_data->image_path) : null,
+                'created_at'=>$testimonial_data->created_at,
+                'updated_at'=>$testimonial_data->updated_at,
             ],200);
         } catch (\Exception $th) {
                         return response()->json(['error' => $th->getMessage()],403);
@@ -93,6 +124,13 @@ class TestimonialController extends Controller
     public function deleteTestimonial(Request $request, $testimonial_id){
         try {
             $testimonial = Testimonial::find($testimonial_id);
+            if (!$testimonial) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+             // Delete the associated image if it exists
+             if ($testimonial->image_path && \Storage::disk('public')->exists($testimonial->image_path)) {
+                \Storage::disk('public')->delete($testimonial->image_path);
+            }
             $testimonial->delete();
             return response()->json([
                 'message' => 'Testimonial deleted successfully'

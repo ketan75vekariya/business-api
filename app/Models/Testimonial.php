@@ -9,5 +9,6 @@ class Testimonial extends Model
     protected $fillable = [
         'clientName',
         'clientReview',
+        'image_path'
     ];
 }
