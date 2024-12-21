@@ -9,5 +9,6 @@ class Team extends Model
     protected $fillable = [
         'employeeName',
         'employeeDescription',
+        'image_path',
     ];
 }
